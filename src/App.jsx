@@ -661,11 +661,11 @@ const AdminDashboard = ({ users, setUsers, quizzes, classes, setClasses }) => {
             </div>
             <div className="form-group">
               <label className="form-label">Subjects</label>
-              <div style={{ display: "flex", flexDirection: "column", gap: 8, padding: "12px 14px", background: "#f7fafd", borderRadius: 10, border: "1.5px solid #d6e4f0" }}>
+              <div style={{ display: "flex", flexWrap: "wrap", gap: 8, padding: "12px 14px", background: "#f7fafd", borderRadius: 10, border: "1.5px solid #d6e4f0" }}>
                 {["English","Mathematics","Physics","Chemistry","Biology","Social Studies","Economics","Accountancy","Business Studies"].map(sub => {
                   const checked = classForm.subjects.includes(sub);
                   return (
-                    <label key={sub} style={{ display: "flex", alignItems: "center", gap: 10, padding: "8px 12px", borderRadius: 8, border: `1.5px solid ${checked?"#2a7fc1":"#d6e4f0"}`, background: checked?"#e8f4fd":"#fff", cursor: "pointer", transition: "all 0.15s" }}>
+                    <label key={sub} style={{ display: "inline-flex", alignItems: "center", gap: 10, padding: "8px 12px", borderRadius: 8, border: `1.5px solid ${checked?"#2a7fc1":"#d6e4f0"}`, background: checked?"#e8f4fd":"#fff", cursor: "pointer", transition: "all 0.15s", width: "fit-content" }}>
                       <input type="checkbox" checked={checked}
                         onChange={() => checked ? removeSubjectFromForm(sub) : setClassForm(f=>({...f,subjects:[...f.subjects,sub]}))}
                         style={{ width: 16, height: 16, accentColor: "#2a7fc1", cursor: "pointer", flexShrink: 0 }} />
