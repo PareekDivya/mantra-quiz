@@ -661,19 +661,21 @@ const AdminDashboard = ({ users, setUsers, quizzes, classes, setClasses }) => {
             </div>
             <div className="form-group">
               <label className="form-label">Subjects</label>
-              <div style={{ display: "flex", gap: 10, marginBottom: 10 }}>
-                <input className="form-input" style={{ flex: 1 }} placeholder="e.g. Mathematics" value={newSubjectInput}
-                  onChange={e => setNewSubjectInput(e.target.value)}
-                  onKeyDown={e => e.key==="Enter" && addSubjectToForm()} />
-                <button className="btn btn-primary btn-sm" onClick={addSubjectToForm}>+ Add</button>
+              <div style={{ display: "flex", flexDirection: "column", gap: 8, padding: "12px 14px", background: "#f7fafd", borderRadius: 10, border: "1.5px solid #d6e4f0" }}>
+                {["English","Mathematics","Physics","Chemistry","Biology","Social Studies","Economics","Accountancy","Business Studies"].map(sub => {
+                  const checked = classForm.subjects.includes(sub);
+                  return (
+                    <label key={sub} style={{ display: "flex", alignItems: "center", gap: 10, padding: "8px 12px", borderRadius: 8, border: `1.5px solid ${checked?"#2a7fc1":"#d6e4f0"}`, background: checked?"#e8f4fd":"#fff", cursor: "pointer", transition: "all 0.15s" }}>
+                      <input type="checkbox" checked={checked}
+                        onChange={() => checked ? removeSubjectFromForm(sub) : setClassForm(f=>({...f,subjects:[...f.subjects,sub]}))}
+                        style={{ width: 16, height: 16, accentColor: "#2a7fc1", cursor: "pointer", flexShrink: 0 }} />
+                      <span style={{ fontWeight: checked?600:400, color: checked?"#0d3a5f":"#4a6d8a", fontSize: "0.92rem" }}>{sub}</span>
+                      {checked && <span className="badge badge-blue" style={{ marginLeft: "auto", fontSize: "0.7rem" }}>✓ Added</span>}
+                    </label>
+                  );
+                })}
               </div>
-              <div style={{ display: "flex", flexWrap: "wrap", gap: 8, minHeight: 36, padding: "10px 12px", background: "#f7fafd", borderRadius: 8, border: "1.5px solid #d6e4f0" }}>
-                {classForm.subjects.length === 0 && <span style={{ color: "#8aabca", fontSize: "0.85rem" }}>No subjects added yet</span>}
-                {classForm.subjects.map(s => (
-                  <span key={s} className="badge badge-blue" style={{ cursor: "pointer", userSelect: "none" }} onClick={() => removeSubjectFromForm(s)}>{s} ×</span>
-                ))}
-              </div>
-              <span style={{ fontSize: "0.75rem", color: "#8aabca" }}>Click a subject badge to remove it</span>
+              <span style={{ fontSize: "0.75rem", color: "#8aabca" }}>Tick subjects to include in this class</span>
             </div>
             <div style={{ display: "flex", gap: 10, justifyContent: "flex-end", marginTop: 8 }}>
               <button className="btn btn-secondary" onClick={() => setClassModal(null)}>Cancel</button>
