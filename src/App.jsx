@@ -926,7 +926,7 @@ const QuizBuilder = ({ quiz, onSave, onCancel, teacher, classes }) => {
               D. 1425<br/>
               Answer: B<br/>
               ---<br/>
-              Q2. $\sqrt{{1444}}$ = ?<br/>
+              Q2. $\sqrt{1444}$ = ?<br/>
               A. 36<br/>
               B. 37<br/>
               C. 38<br/>
