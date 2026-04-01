@@ -688,18 +688,167 @@ const AdminDashboard = ({ users, setUsers, quizzes, classes, setClasses }) => {
   );
 };
 
+// ─── LATEX RENDERER ──────────────────────────────────────────────────────────
+const LatexText = ({ text }) => {
+  if (!text) return null;
+  // Split on $...$ or $$...$$ patterns for inline/block LaTeX
+  const parts = text.split(/(\$\$[\s\S]+?\$\$|\$[^$
+]+?\$)/g);
+  return (
+    <span>
+      {parts.map((part, i) => {
+        if (part.startsWith('$$') && part.endsWith('$$')) {
+          const latex = part.slice(2, -2);
+          return <span key={i} style={{ fontFamily: "'Computer Modern', Georgia, serif", fontStyle: "italic", background: "#f0f7ff", padding: "1px 4px", borderRadius: 4, fontSize: "1.05em" }}>{renderLatex(latex)}</span>;
+        }
+        if (part.startsWith('$') && part.endsWith('$')) {
+          const latex = part.slice(1, -1);
+          return <span key={i} style={{ fontFamily: "'Computer Modern', Georgia, serif", fontStyle: "italic", background: "#f0f7ff", padding: "1px 4px", borderRadius: 4 }}>{renderLatex(latex)}</span>;
+        }
+        return <span key={i}>{part}</span>;
+      })}
+    </span>
+  );
+};
+
+// Simple LaTeX symbol converter
+const renderLatex = (latex) => {
+  return latex
+    .replace(/\frac\{([^}]+)\}\{([^}]+)\}/g, '($1)/($2)')
+    .replace(/\sqrt\{([^}]+)\}/g, '√($1)')
+    .replace(/\sqrt/g, '√')
+    .replace(/\^(\{[^}]+\}|[^\s{])/g, (_, exp) => '^' + exp.replace(/[{}]/g,''))
+    .replace(/_(\{[^}]+\}|[^\s{])/g, (_, sub) => '₍' + sub.replace(/[{}]/g,'') + '₎')
+    .replace(/\times/g, '×').replace(/\div/g, '÷').replace(/\pm/g, '±')
+    .replace(/\leq/g, '≤').replace(/\geq/g, '≥').replace(/\neq/g, '≠')
+    .replace(/\alpha/g, 'α').replace(/\beta/g, 'β').replace(/\gamma/g, 'γ')
+    .replace(/\delta/g, 'δ').replace(/\Delta/g, 'Δ').replace(/\pi/g, 'π')
+    .replace(/\theta/g, 'θ').replace(/\lambda/g, 'λ').replace(/\mu/g, 'μ')
+    .replace(/\sigma/g, 'σ').replace(/\Sigma/g, 'Σ').replace(/\omega/g, 'ω')
+    .replace(/\infty/g, '∞').replace(/\sum/g, 'Σ').replace(/\int/g, '∫')
+    .replace(/\cdot/g, '·').replace(/\ldots/g, '…').replace(/\rightarrow/g, '→')
+    .replace(/\leftarrow/g, '←').replace(/\Rightarrow/g, '⇒')
+    .replace(/[{}\]/g, '');
+};
+
+// Also handle plain text math notation (no $ needed)
+const renderPlainMath = (text) => {
+  if (!text) return text;
+  return text
+    .replace(/\^2/g, '²').replace(/\^3/g, '³')
+    .replace(/sqrt\(([^)]+)\)/g, '√($1)')
+    .replace(/√(\d+)/g, (_, n) => '√' + n);
+};
+
+// ─── BULK IMPORT PARSER ───────────────────────────────────────────────────────
+// ─── LATEX RENDERER ─────────────────────────────────────────────────────────
+const LatexText = ({ text }) => {
+  const ref = useRef(null);
+  useEffect(() => {
+    if (!ref.current || !window.katex) return;
+    // Replace block math $$...$$ then inline $...$
+    let html = text
+      .replace(/\$\$(.+?)\$\$/gs, (_, m) => {
+        try { return window.katex.renderToString(m, { displayMode: true, throwOnError: false }); }
+        catch { return _; }
+      })
+      .replace(/\$(.+?)\$/g, (_, m) => {
+        try { return window.katex.renderToString(m, { displayMode: false, throwOnError: false }); }
+        catch { return _; }
+      });
+    ref.current.innerHTML = html;
+  }, [text]);
+  return <span ref={ref}>{text}</span>;
+};
+
+// ─── BULK QUESTION PARSER ─────────────────────────────────────────────────────
+const parseBulkQuestions = (raw) => {
+  const results = [];
+  // Split blocks by separator lines: ---, ⸻, or 2+ blank lines
+  const blocks = raw.split(/\n[ \t]*(?:[-–—⸻]{2,})[ \t]*\n|\n{2,}/).map(b => b.trim()).filter(Boolean);
+
+  for (const block of blocks) {
+    const lines = block.split('\n').map(l => l.trim()).filter(Boolean);
+    if (lines.length < 3) continue;
+
+    // Question: starts with Q1. Q1) Q1: or is just the first line
+    const qLineRaw = lines[0];
+    const qLine = qLineRaw.replace(/^Q\s*\d+\s*[.):\-]\s*/i, '').trim();
+    if (!qLine) continue;
+
+    const options = [];
+    let correct = -1;
+
+    for (let i = 1; i < lines.length; i++) {
+      const line = lines[i];
+      // Option: A. A) A: followed by text
+      const optMatch = line.match(/^([A-D])\s*[.):\-]\s*(.+)/i);
+      if (optMatch) {
+        options.push(optMatch[2].trim());
+        continue;
+      }
+      // Answer: "Answer: B" or "Ans: B" or "Answer - B"
+      const ansMatch = line.match(/^(?:answer|ans(?:wer)?)\s*[.:\-]\s*([A-D])/i);
+      if (ansMatch) {
+        correct = ['A','B','C','D'].indexOf(ansMatch[1].toUpperCase());
+      }
+    }
+
+    if (options.length === 4 && correct >= 0) {
+      results.push({
+        id: Date.now() + results.length,
+        text: qLine,
+        options,
+        correct,
+        points: 1
+      });
+    }
+  }
+  return results;
+};
+
 // ─── QUIZ BUILDER ─────────────────────────────────────────────────────────────
 const QuizBuilder = ({ quiz, onSave, onCancel, teacher, classes }) => {
   const teacherClasses = (teacher?.classes||[]).map(cn => classes.find(c=>c.name===cn)).filter(Boolean);
   const [q, setQ] = useState(quiz || { title: "", subject: "", class: "", testTimer: 20, questionTimer: 30, questions: [], status: "draft" });
+  const [importModal, setImportModal] = useState(false);
+  const [importText, setImportText] = useState("");
+  const [importPreview, setImportPreview] = useState([]);
+  const [importError, setImportError] = useState("");
+  const [latexMode, setLatexMode] = useState(false);
 
   const addQ = () => setQ(prev => ({ ...prev, questions: [...prev.questions, { id: genId(prev.questions), text: "", options: ["","","",""], correct: 0, points: 1 }] }));
   const updateQ = (idx, field, val) => setQ(prev => { const qs = [...prev.questions]; qs[idx] = {...qs[idx], [field]: val}; return {...prev, questions: qs}; });
   const updateOpt = (qi, oi, val) => setQ(prev => { const qs = [...prev.questions]; const opts = [...qs[qi].options]; opts[oi] = val; qs[qi] = {...qs[qi], options: opts}; return {...prev, questions: qs}; });
   const removeQ = idx => setQ(prev => ({ ...prev, questions: prev.questions.filter((_,i) => i!==idx) }));
 
+  const handleParseImport = () => {
+    setImportError("");
+    const parsed = parseBulkQuestions(importText);
+    if (parsed.length === 0) {
+      setImportError("No valid questions found. Please check the format and try again.");
+      setImportPreview([]);
+    } else {
+      setImportPreview(parsed);
+    }
+  };
+
+  const handleConfirmImport = () => {
+    const base = q.questions;
+    const newQs = importPreview.map((p, i) => ({...p, id: genId([...base, ...importPreview.slice(0,i)])}));
+    setQ(prev => ({ ...prev, questions: [...prev.questions, ...newQs] }));
+    setImportModal(false);
+    setImportText("");
+    setImportPreview([]);
+    setImportError("");
+  };
+
   return (
     <div className="fade-in">
+      {/* KaTeX CDN */}
+      <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.9/katex.min.css" />
+      <script src="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.9/katex.min.js" async />
+
       <div style={{ display: "flex", alignItems: "center", gap: 14, marginBottom: 24 }}>
         <button className="btn btn-secondary btn-sm" onClick={onCancel}>← Back</button>
         <div>
@@ -755,8 +904,20 @@ const QuizBuilder = ({ quiz, onSave, onCancel, teacher, classes }) => {
         </div>
       </div>
 
+      {/* Questions header */}
+      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 14 }}>
+        <h3 style={{ color: "#0d3a5f" }}>Questions ({q.questions.length})</h3>
+        <div style={{ display: "flex", gap: 8, alignItems: "center" }}>
+          <label style={{ display: "flex", alignItems: "center", gap: 6, fontSize: "0.85rem", color: "#4a6d8a", cursor: "pointer", padding: "6px 12px", borderRadius: 8, background: latexMode ? "#e8f4fd" : "#f7fafd", border: `1.5px solid ${latexMode?"#2a7fc1":"#d6e4f0"}` }}>
+            <input type="checkbox" checked={latexMode} onChange={e => setLatexMode(e.target.checked)} style={{ accentColor: "#2a7fc1" }} />
+            <span style={{ fontWeight: 600, color: latexMode ? "#0d3a5f" : "#4a6d8a" }}>∑ LaTeX Preview</span>
+          </label>
+          <button className="btn btn-gold btn-sm" onClick={() => setImportModal(true)}>📋 Bulk Import</button>
+        </div>
+      </div>
+
+      {/* Questions list */}
       <div style={{ marginBottom: 12 }}>
-        <h3 style={{ color: "#0d3a5f", marginBottom: 14 }}>Questions ({q.questions.length})</h3>
         {q.questions.map((ques, qi) => (
           <div key={ques.id} className="question-card slide-in">
             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 12 }}>
@@ -767,7 +928,12 @@ const QuizBuilder = ({ quiz, onSave, onCancel, teacher, classes }) => {
                 <button className="btn btn-danger btn-sm" onClick={() => removeQ(qi)}>✕</button>
               </div>
             </div>
-            <textarea className="form-input" style={{ width: "100%", resize: "vertical", minHeight: 60 }} placeholder="Enter question text..." value={ques.text} onChange={e => updateQ(qi, "text", e.target.value)} />
+            <textarea className="form-input" style={{ width: "100%", resize: "vertical", minHeight: 60 }} placeholder="Enter question text... (use $...$ for inline LaTeX, $$...$$ for block)" value={ques.text} onChange={e => updateQ(qi, "text", e.target.value)} />
+            {latexMode && ques.text && (
+              <div style={{ marginTop: 6, padding: "8px 12px", background: "#f0f7ff", borderRadius: 8, fontSize: "0.92rem", color: "#0d3a5f", border: "1px solid #bde0f7" }}>
+                <LatexText text={ques.text} />
+              </div>
+            )}
             <div style={{ marginTop: 12 }}>
               {ques.options.map((opt, oi) => (
                 <div key={oi} className="option-row">
@@ -776,7 +942,12 @@ const QuizBuilder = ({ quiz, onSave, onCancel, teacher, classes }) => {
                     {["A","B","C","D"][oi]}
                   </div>
                   <input className="form-input" style={{ flex: 1 }} placeholder={`Option ${["A","B","C","D"][oi]}`} value={opt} onChange={e => updateOpt(qi, oi, e.target.value)} />
-                  {ques.correct === oi && <span style={{ fontSize: "0.75rem", color: "#1a7a42", fontWeight: 600 }}>✓ Correct</span>}
+                  {latexMode && opt && (
+                    <div style={{ minWidth: 80, padding: "4px 8px", background: "#f0f7ff", borderRadius: 6, fontSize: "0.85rem", color: "#0d3a5f", border: "1px solid #bde0f7" }}>
+                      <LatexText text={opt} />
+                    </div>
+                  )}
+                  {ques.correct === oi && !latexMode && <span style={{ fontSize: "0.75rem", color: "#1a7a42", fontWeight: 600 }}>✓ Correct</span>}
                 </div>
               ))}
             </div>
@@ -790,6 +961,80 @@ const QuizBuilder = ({ quiz, onSave, onCancel, teacher, classes }) => {
         <button className="btn btn-secondary" onClick={() => onSave({...q, status:"draft"})}>Save as Draft</button>
         <button className="btn btn-primary" onClick={() => onSave({...q, status:"published"})}>🚀 Publish Quiz</button>
       </div>
+
+      {/* ── BULK IMPORT MODAL ── */}
+      {importModal && (
+        <div className="modal-overlay" onClick={() => { setImportModal(false); setImportPreview([]); setImportError(""); }}>
+          <div className="modal-box" onClick={e => e.stopPropagation()} style={{ maxWidth: 680, maxHeight: "90vh", overflow: "auto" }}>
+            <h3 style={{ marginBottom: 6 }}>📋 Bulk Import Questions</h3>
+            <p style={{ color: "#4a6d8a", fontSize: "0.85rem", marginBottom: 16 }}>
+              Paste your questions below. Use the format shown. Separate questions with a line of dashes (---) or the ⸻ character. LaTeX is supported using <code style={{ background: "#f0f7ff", padding: "1px 5px", borderRadius: 4 }}>$...$</code> for inline and <code style={{ background: "#f0f7ff", padding: "1px 5px", borderRadius: 4 }}>$$...$$</code> for block math.
+            </p>
+
+            {/* Format example */}
+            <div style={{ background: "#f7fafd", border: "1.5px solid #d6e4f0", borderRadius: 10, padding: "12px 16px", marginBottom: 16, fontSize: "0.8rem", fontFamily: "monospace", color: "#4a6d8a", lineHeight: 1.7 }}>
+              Q1. What is $35^2$?<br/>
+              A. 1125<br/>
+              B. 1225<br/>
+              C. 1325<br/>
+              D. 1425<br/>
+              Answer: B<br/>
+              ---<br/>
+              Q2. $\sqrt{{1444}}$ = ?<br/>
+              A. 36<br/>
+              B. 37<br/>
+              C. 38<br/>
+              D. 39<br/>
+              Answer: C
+            </div>
+
+            <textarea
+              className="form-input"
+              style={{ width: "100%", minHeight: 220, resize: "vertical", fontFamily: "monospace", fontSize: "0.88rem" }}
+              placeholder="Paste your questions here..."
+              value={importText}
+              onChange={e => { setImportText(e.target.value); setImportPreview([]); setImportError(""); }}
+            />
+
+            {importError && (
+              <div style={{ marginTop: 10, padding: "10px 14px", background: "#fde8e6", color: "#a93226", borderRadius: 8, fontSize: "0.88rem" }}>{importError}</div>
+            )}
+
+            <button className="btn btn-primary" style={{ marginTop: 12, width: "100%", justifyContent: "center" }} onClick={handleParseImport}>
+              🔍 Parse Questions
+            </button>
+
+            {/* Preview */}
+            {importPreview.length > 0 && (
+              <div style={{ marginTop: 20 }}>
+                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 12 }}>
+                  <h4 style={{ color: "#0d3a5f", fontSize: "0.95rem" }}>✅ {importPreview.length} question{importPreview.length>1?"s":""} found — preview:</h4>
+                </div>
+                {importPreview.map((p, i) => (
+                  <div key={i} style={{ padding: "12px 16px", background: "#f7fafd", border: "1.5px solid #d6e4f0", borderRadius: 10, marginBottom: 10 }}>
+                    <div style={{ fontWeight: 600, marginBottom: 8, color: "#0d3a5f", fontSize: "0.92rem" }}>
+                      Q{i+1}. <LatexText text={p.text} />
+                    </div>
+                    {p.options.map((opt, oi) => (
+                      <div key={oi} style={{ display: "flex", alignItems: "center", gap: 8, padding: "4px 0", fontSize: "0.88rem" }}>
+                        <span style={{ width: 24, height: 24, borderRadius: "50%", display: "inline-flex", alignItems: "center", justifyContent: "center", fontSize: "0.75rem", fontWeight: 700, background: oi===p.correct ? "#d4efdf" : "#eef4f9", color: oi===p.correct ? "#1a7a42" : "#4a6d8a", flexShrink: 0 }}>
+                          {["A","B","C","D"][oi]}
+                        </span>
+                        <LatexText text={opt} />
+                        {oi===p.correct && <span style={{ fontSize: "0.75rem", color: "#1a7a42", fontWeight: 600 }}>✓ Correct</span>}
+                      </div>
+                    ))}
+                  </div>
+                ))}
+                <div style={{ display: "flex", gap: 10, marginTop: 4 }}>
+                  <button className="btn btn-secondary" style={{ flex: 1, justifyContent: "center" }} onClick={() => { setImportPreview([]); }}>← Edit</button>
+                  <button className="btn btn-success" style={{ flex: 1, justifyContent: "center" }} onClick={handleConfirmImport}>✓ Add {importPreview.length} Questions</button>
+                </div>
+              </div>
+            )}
+          </div>
+        </div>
+      )}
     </div>
   );
 };
@@ -871,7 +1116,7 @@ const ProjectionMode = ({ quiz, onExit }) => {
               </div>
             </div>
 
-            <div className="projection-question">{q.text}</div>
+            <div className="projection-question"><LatexText text={renderPlainMath(q.text)} /></div>
 
             <div className="projection-options">
               {q.options.map((opt, i) => (
@@ -879,7 +1124,7 @@ const ProjectionMode = ({ quiz, onExit }) => {
                   <div style={{ width: 36, height: 36, borderRadius: "50%", background: revealed && i===q.correct ? "rgba(39,174,96,0.4)" : "rgba(255,255,255,0.1)", display: "flex", alignItems: "center", justifyContent: "center", fontWeight: 700, flexShrink: 0 }}>
                     {["A","B","C","D"][i]}
                   </div>
-                  <span>{opt}</span>
+                  <span><LatexText text={renderPlainMath(opt)} /></span>
                   {revealed && i===q.correct && <span style={{ marginLeft: "auto", fontSize: "1.2rem" }}>✓</span>}
                 </div>
               ))}
@@ -1099,14 +1344,14 @@ const QuizAttempt = ({ quiz, user, onSubmit, onBack }) => {
       <div className="quiz-progress"><div className="quiz-progress-bar" style={{ width: `${((step)/quiz.questions.length)*100}%` }} /></div>
 
       <div className="card" style={{ padding: "28px 24px", marginBottom: 20 }}>
-        <h3 style={{ fontSize: "1.15rem", lineHeight: 1.5, marginBottom: 24, color: "#0d3a5f" }}>{q.text}</h3>
+        <h3 style={{ fontSize: "1.15rem", lineHeight: 1.5, marginBottom: 24, color: "#0d3a5f" }}><LatexText text={renderPlainMath(q.text)} /></h3>
         {q.options.map((opt, i) => (
           <button key={i} className={`option-btn ${selected===i&&!revealed?"selected":""} ${revealed&&i===q.correct?"correct-ans":""} ${revealed&&selected===i&&i!==q.correct?"wrong-ans":""}`}
             onClick={() => choose(i)} disabled={revealed}>
             <span className="option-indicator" style={{ background: revealed&&i===q.correct?"#d4efdf":revealed&&selected===i&&i!==q.correct?"#fde8e6":"#eef4f9", color: "#4a6d8a", width: 30, height: 30, borderRadius: "50%", display: "flex", alignItems: "center", justifyContent: "center", fontSize: "0.82rem", fontWeight: 700 }}>
               {["A","B","C","D"][i]}
             </span>
-            {opt}
+            <LatexText text={renderPlainMath(opt)} />
           </button>
         ))}
       </div>
