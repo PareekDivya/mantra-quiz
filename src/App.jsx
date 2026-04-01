@@ -689,20 +689,18 @@ const AdminDashboard = ({ users, setUsers, quizzes, classes, setClasses, activeT
 
 //  LATEX RENDERER 
 const LatexText = ({ text }) => {
-  if (!text) return null;
-  // Split on $...$ or $$...$$ patterns for inline/block LaTeX
-  const parts = text.split(/(\$\$[\s\S]+?\$\$|\$[^$
-]+?\$)/g);
+  if (!text) return <span>{text}</span>;
+  const parts = text.split(/(\$\$[\s\S]+?\$\$|\$[^$]+?\$)/g);
   return (
     <span>
       {parts.map((part, i) => {
         if (part.startsWith('$$') && part.endsWith('$$')) {
           const latex = part.slice(2, -2);
-          return <span key={i} style={{ fontFamily: "'Computer Modern', Georgia, serif", fontStyle: "italic", background: "#f0f7ff", padding: "1px 4px", borderRadius: 4, fontSize: "1.05em" }}>{renderLatex(latex)}</span>;
+          return <span key={i} style={{ fontFamily: "Georgia, serif", fontStyle: "italic", background: "#f0f7ff", padding: "1px 4px", borderRadius: 4, fontSize: "1.05em" }}>{latex}</span>;
         }
         if (part.startsWith('$') && part.endsWith('$')) {
           const latex = part.slice(1, -1);
-          return <span key={i} style={{ fontFamily: "'Computer Modern', Georgia, serif", fontStyle: "italic", background: "#f0f7ff", padding: "1px 4px", borderRadius: 4 }}>{renderLatex(latex)}</span>;
+          return <span key={i} style={{ fontFamily: "Georgia, serif", fontStyle: "italic", background: "#f0f7ff", padding: "1px 4px", borderRadius: 4 }}>{latex}</span>;
         }
         return <span key={i}>{part}</span>;
       })}
