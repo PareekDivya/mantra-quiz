@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef, useCallback } from "react";
 
-// ─── GLOBAL STYLES ───────────────────────────────────────────────────────────
+//  GLOBAL STYLES 
 const GlobalStyle = () => (
   <style>{`
     @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700;800&family=DM+Sans:wght@300;400;500;600&display=swap');
@@ -199,7 +199,7 @@ const GlobalStyle = () => (
   `}</style>
 );
 
-// ─── SEED DATA ────────────────────────────────────────────────────────────────
+//  SEED DATA 
 const SEED = {
   users: [
     { id: 1, name: "Dr. Sarah Admin", email: "admin@mantra.edu", password: "admin123", role: "admin", status: "approved", avatar: "SA" },
@@ -239,7 +239,7 @@ const SEED = {
   ],
 };
 
-// ─── HELPERS ─────────────────────────────────────────────────────────────────
+//  HELPERS 
 const useLocalStore = (key, init) => {
   const [state, setState] = useState(() => {
     try { const s = localStorage.getItem(key); return s ? JSON.parse(s) : init; }
@@ -255,7 +255,7 @@ const useLocalStore = (key, init) => {
 
 const genId = arr => (arr.length ? Math.max(...arr.map(x => x.id)) + 1 : 1);
 
-// ─── TIMER RING ───────────────────────────────────────────────────────────────
+//  TIMER RING 
 const TimerRing = ({ seconds, total, size = 80, stroke = 6 }) => {
   const r = (size - stroke) / 2;
   const circ = 2 * Math.PI * r;
@@ -275,7 +275,7 @@ const TimerRing = ({ seconds, total, size = 80, stroke = 6 }) => {
   );
 };
 
-// ─── LOGIN PAGE ───────────────────────────────────────────────────────────────
+//  LOGIN PAGE 
 const LoginPage = ({ users, onLogin, onRegister }) => {
   const [tab, setTab] = useState("login");
   const [form, setForm] = useState({ email: "", password: "", name: "", role: "student", class: "" });
@@ -375,9 +375,10 @@ const LoginPage = ({ users, onLogin, onRegister }) => {
   );
 };
 
-// ─── ADMIN DASHBOARD ──────────────────────────────────────────────────────────
-const AdminDashboard = ({ users, setUsers, quizzes, classes, setClasses }) => {
-  const [tab, setTab] = useState("overview");
+//  ADMIN DASHBOARD 
+const AdminDashboard = ({ users, setUsers, quizzes, classes, setClasses, activeTab, setActiveTab }) => {
+  const tab = activeTab;
+  const setTab = setActiveTab;
   const [assignModal, setAssignModal] = useState(null);
   const [assignClass, setAssignClass] = useState("");
   const [subjectModal, setSubjectModal] = useState(null); // student subject assignment
@@ -453,19 +454,17 @@ const AdminDashboard = ({ users, setUsers, quizzes, classes, setClasses }) => {
         ))}
       </div>
 
-      <div style={{ display: "flex", gap: 8, marginBottom: 20 }}>
-        {["overview","classes","teachers","students"].map(t => (
-          <button key={t} className={`btn ${tab===t?"btn-primary":"btn-secondary"} btn-sm`} onClick={() => setTab(t)}>
-            {t === "overview" ? "⏳ Pending" : t === "classes" ? "🏫 Classes" : t === "teachers" ? "👨‍🏫 Teachers" : "👩‍🎓 Students"}
-          </button>
+      <div style={{ display: "flex", gap: 8, marginBottom: 20, flexWrap: "wrap" }}>
+        {[["overview","⏳ Pending"],["classes"," Classes"],["teachers"," Teachers"],["students"," Students"]].map(([t,l]) => (
+          <button key={t} className={`btn ${tab===t?"btn-primary":"btn-secondary"} btn-sm`} onClick={() => setTab(t)}>{l}</button>
         ))}
       </div>
 
-      {/* ── PENDING APPROVALS ── */}
+      {/*  PENDING APPROVALS  */}
       {tab === "overview" && (
         <div className="card" style={{ padding: 24 }}>
           <h3 style={{ marginBottom: 16, fontSize: "1.1rem", color: "#0d3a5f" }}>⏳ Pending Approvals ({pending.length})</h3>
-          {pending.length === 0 ? <div className="empty-state"><div className="empty-state-icon">✅</div><p>No pending registrations</p></div> : (
+          {pending.length === 0 ? <div className="empty-state"><div className="empty-state-icon"></div><p>No pending registrations</p></div> : (
             <table className="data-table">
               <thead><tr><th>Name</th><th>Email</th><th>Role</th><th>Actions</th></tr></thead>
               <tbody>{pending.map(u => (
@@ -474,8 +473,8 @@ const AdminDashboard = ({ users, setUsers, quizzes, classes, setClasses }) => {
                   <td style={{ color: "#4a6d8a" }}>{u.email}</td>
                   <td><span className={`badge ${u.role==="teacher"?"badge-blue":"badge-green"}`}>{u.role}</span></td>
                   <td style={{ display: "flex", gap: 8 }}>
-                    <button className="btn btn-success btn-sm" onClick={() => approve(u.id)}>✓ Approve</button>
-                    <button className="btn btn-danger btn-sm" onClick={() => reject(u.id)}>✗ Reject</button>
+                    <button className="btn btn-success btn-sm" onClick={() => approve(u.id)}> Approve</button>
+                    <button className="btn btn-danger btn-sm" onClick={() => reject(u.id)}> Reject</button>
                   </td>
                 </tr>
               ))}</tbody>
@@ -484,15 +483,15 @@ const AdminDashboard = ({ users, setUsers, quizzes, classes, setClasses }) => {
         </div>
       )}
 
-      {/* ── CLASSES ── */}
+      {/*  CLASSES  */}
       {tab === "classes" && (
         <div>
           <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 16 }}>
-            <h3 style={{ fontSize: "1.1rem", color: "#0d3a5f" }}>🏫 Classes & Subjects</h3>
+            <h3 style={{ fontSize: "1.1rem", color: "#0d3a5f" }}> Classes & Subjects</h3>
             <button className="btn btn-primary btn-sm" onClick={openNewClass}>+ New Class</button>
           </div>
           {classes.length === 0 ? (
-            <div className="card"><div className="empty-state"><div className="empty-state-icon">🏫</div><p>No classes yet. Create one!</p></div></div>
+            <div className="card"><div className="empty-state"><div className="empty-state-icon"></div><p>No classes yet. Create one!</p></div></div>
           ) : (
             <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(300px,1fr))", gap: 16 }}>
               {classes.map(cls => (
@@ -500,8 +499,8 @@ const AdminDashboard = ({ users, setUsers, quizzes, classes, setClasses }) => {
                   <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 12 }}>
                     <h4 style={{ fontSize: "1rem", color: "#0d3a5f" }}>{cls.name}</h4>
                     <div style={{ display: "flex", gap: 6 }}>
-                      <button className="btn btn-secondary btn-sm" onClick={() => openEditClass(cls)}>✏️ Edit</button>
-                      <button className="btn btn-danger btn-sm" onClick={() => deleteClass(cls.id)}>🗑</button>
+                      <button className="btn btn-secondary btn-sm" onClick={() => openEditClass(cls)}> Edit</button>
+                      <button className="btn btn-danger btn-sm" onClick={() => deleteClass(cls.id)}></button>
                     </div>
                   </div>
                   <div style={{ fontSize: "0.78rem", color: "#4a6d8a", marginBottom: 8, fontWeight: 600, textTransform: "uppercase", letterSpacing: "0.05em" }}>Subjects ({cls.subjects.length})</div>
@@ -519,10 +518,10 @@ const AdminDashboard = ({ users, setUsers, quizzes, classes, setClasses }) => {
         </div>
       )}
 
-      {/* ── TEACHERS ── */}
+      {/*  TEACHERS  */}
       {tab === "teachers" && (
         <div className="card" style={{ padding: 24 }}>
-          <h3 style={{ marginBottom: 16, fontSize: "1.1rem", color: "#0d3a5f" }}>👨‍🏫 Teachers</h3>
+          <h3 style={{ marginBottom: 16, fontSize: "1.1rem", color: "#0d3a5f" }}> Teachers</h3>
           <table className="data-table">
             <thead><tr><th>Name</th><th>Email</th><th>Classes Assigned</th><th>Actions</th></tr></thead>
             <tbody>{teachers.map(t => (
@@ -544,11 +543,11 @@ const AdminDashboard = ({ users, setUsers, quizzes, classes, setClasses }) => {
         </div>
       )}
 
-      {/* ── STUDENTS ── */}
+      {/*  STUDENTS  */}
       {tab === "students" && (
         <div className="card" style={{ padding: 24 }}>
-          <h3 style={{ marginBottom: 16, fontSize: "1.1rem", color: "#0d3a5f" }}>👩‍🎓 Students & Subject Assignments</h3>
-          {students.length === 0 ? <div className="empty-state"><div className="empty-state-icon">👩‍🎓</div><p>No approved students yet.</p></div> : (
+          <h3 style={{ marginBottom: 16, fontSize: "1.1rem", color: "#0d3a5f" }}> Students & Subject Assignments</h3>
+          {students.length === 0 ? <div className="empty-state"><div className="empty-state-icon"></div><p>No approved students yet.</p></div> : (
             <table className="data-table">
               <thead><tr><th>Name</th><th>Class</th><th>Subjects Enrolled</th><th>Actions</th></tr></thead>
               <tbody>{students.map(s => {
@@ -565,7 +564,7 @@ const AdminDashboard = ({ users, setUsers, quizzes, classes, setClasses }) => {
                     </td>
                     <td>
                       <button className="btn btn-secondary btn-sm" onClick={() => setSubjectModal(s)} disabled={!cls}>
-                        {cls ? "✏️ Subjects" : "No class"}
+                        {cls ? " Subjects" : "No class"}
                       </button>
                     </td>
                   </tr>
@@ -576,7 +575,7 @@ const AdminDashboard = ({ users, setUsers, quizzes, classes, setClasses }) => {
         </div>
       )}
 
-      {/* ── MODAL: Assign class to teacher ── */}
+      {/*  MODAL: Assign class to teacher  */}
       {assignModal && (
         <div className="modal-overlay" onClick={() => setAssignModal(null)}>
           <div className="modal-box" onClick={e => e.stopPropagation()}>
@@ -592,7 +591,7 @@ const AdminDashboard = ({ users, setUsers, quizzes, classes, setClasses }) => {
                       <button key={c.id}
                         className={`btn btn-sm ${assigned?"btn-primary":"btn-secondary"}`}
                         onClick={() => assigned ? removeClass(assignModal.id, c.name) : setUsers(u => u.map(x => x.id===assignModal.id ? {...x, classes:[...new Set([...(x.classes||[]),c.name])]} : x))}>
-                        {assigned ? "✓ " : ""}{c.name}
+                        {assigned ? " " : ""}{c.name}
                       </button>
                     );
                   })}
@@ -608,7 +607,7 @@ const AdminDashboard = ({ users, setUsers, quizzes, classes, setClasses }) => {
         </div>
       )}
 
-      {/* ── MODAL: Assign subjects to student ── */}
+      {/*  MODAL: Assign subjects to student  */}
       {subjectModal && (() => {
         const cls = getStudentClass(subjectModal);
         const studentSubjects = subjectModal.subjects || [];
@@ -650,11 +649,11 @@ const AdminDashboard = ({ users, setUsers, quizzes, classes, setClasses }) => {
         );
       })()}
 
-      {/* ── MODAL: Create / Edit class ── */}
+      {/*  MODAL: Create / Edit class  */}
       {classModal !== null && (
         <div className="modal-overlay" onClick={() => setClassModal(null)}>
           <div className="modal-box" onClick={e => e.stopPropagation()} style={{ maxWidth: 500 }}>
-            <h3 style={{ marginBottom: 20 }}>{classModal === "new" ? "➕ Create New Class" : "✏️ Edit Class"}</h3>
+            <h3 style={{ marginBottom: 20 }}>{classModal === "new" ? " Create New Class" : " Edit Class"}</h3>
             <div className="form-group">
               <label className="form-label">Class Name</label>
               <input className="form-input" placeholder="e.g. Class 9A" value={classForm.name} onChange={e => setClassForm(f=>({...f,name:e.target.value}))} />
@@ -670,7 +669,7 @@ const AdminDashboard = ({ users, setUsers, quizzes, classes, setClasses }) => {
                         onChange={() => checked ? removeSubjectFromForm(sub) : setClassForm(f=>({...f,subjects:[...f.subjects,sub]}))}
                         style={{ width: 16, height: 16, accentColor: "#2a7fc1", cursor: "pointer", flexShrink: 0 }} />
                       <span style={{ fontWeight: checked?600:400, color: checked?"#0d3a5f":"#4a6d8a", fontSize: "0.92rem" }}>{sub}</span>
-                      {checked && <span className="badge badge-blue" style={{ marginLeft: "auto", fontSize: "0.7rem" }}>✓ Added</span>}
+                      {checked && <span className="badge badge-blue" style={{ marginLeft: "auto", fontSize: "0.7rem" }}> Added</span>}
                     </label>
                   );
                 })}
@@ -688,7 +687,7 @@ const AdminDashboard = ({ users, setUsers, quizzes, classes, setClasses }) => {
   );
 };
 
-// ─── LATEX RENDERER ──────────────────────────────────────────────────────────
+//  LATEX RENDERER 
 const LatexText = ({ text }) => {
   if (!text) return null;
   // Split on $...$ or $$...$$ patterns for inline/block LaTeX
@@ -740,8 +739,8 @@ const renderPlainMath = (text) => {
     .replace(/√(\d+)/g, (_, n) => '√' + n);
 };
 
-// ─── BULK IMPORT PARSER ───────────────────────────────────────────────────────
-// ─── LATEX RENDERER ─────────────────────────────────────────────────────────
+//  BULK IMPORT PARSER 
+//  LATEX RENDERER 
 const LatexText = ({ text }) => {
   const ref = useRef(null);
   useEffect(() => {
@@ -761,11 +760,11 @@ const LatexText = ({ text }) => {
   return <span ref={ref}>{text}</span>;
 };
 
-// ─── BULK QUESTION PARSER ─────────────────────────────────────────────────────
+//  BULK QUESTION PARSER 
 const parseBulkQuestions = (raw) => {
   const results = [];
-  // Split blocks by separator lines: ---, ⸻, or 2+ blank lines
-  const blocks = raw.split(/\n[ \t]*(?:[-–—⸻]{2,})[ \t]*\n|\n{2,}/).map(b => b.trim()).filter(Boolean);
+  // Split blocks by separator lines: ---, , or 2+ blank lines
+  const blocks = raw.split(/\n[ \t]*(?:[-–—]{2,})[ \t]*\n|\n{2,}/).map(b => b.trim()).filter(Boolean);
 
   for (const block of blocks) {
     const lines = block.split('\n').map(l => l.trim()).filter(Boolean);
@@ -807,7 +806,7 @@ const parseBulkQuestions = (raw) => {
   return results;
 };
 
-// ─── QUIZ BUILDER ─────────────────────────────────────────────────────────────
+//  QUIZ BUILDER 
 const QuizBuilder = ({ quiz, onSave, onCancel, teacher, classes }) => {
   const teacherClasses = (teacher?.classes||[]).map(cn => classes.find(c=>c.name===cn)).filter(Boolean);
   const [q, setQ] = useState(quiz || { title: "", subject: "", class: "", testTimer: 20, questionTimer: 30, questions: [], status: "draft" });
@@ -897,7 +896,7 @@ const QuizBuilder = ({ quiz, onSave, onCancel, teacher, classes }) => {
             <span style={{ fontSize: "0.78rem", color: "#4a6d8a" }}>Total time allowed for the entire quiz</span>
           </div>
           <div className="form-group">
-            <label className="form-label">❓ Question Timer (seconds)</label>
+            <label className="form-label"> Question Timer (seconds)</label>
             <input className="form-input" type="number" min="5" max="300" value={q.questionTimer} onChange={e => setQ(p=>({...p,questionTimer:+e.target.value}))} />
             <span style={{ fontSize: "0.78rem", color: "#4a6d8a" }}>Auto-advance after this many seconds</span>
           </div>
@@ -912,7 +911,7 @@ const QuizBuilder = ({ quiz, onSave, onCancel, teacher, classes }) => {
             <input type="checkbox" checked={latexMode} onChange={e => setLatexMode(e.target.checked)} style={{ accentColor: "#2a7fc1" }} />
             <span style={{ fontWeight: 600, color: latexMode ? "#0d3a5f" : "#4a6d8a" }}>∑ LaTeX Preview</span>
           </label>
-          <button className="btn btn-gold btn-sm" onClick={() => setImportModal(true)}>📋 Bulk Import</button>
+          <button className="btn btn-gold btn-sm" onClick={() => setImportModal(true)}> Bulk Import</button>
         </div>
       </div>
 
@@ -925,7 +924,7 @@ const QuizBuilder = ({ quiz, onSave, onCancel, teacher, classes }) => {
               <div style={{ display: "flex", gap: 8, alignItems: "center" }}>
                 <label style={{ fontSize: "0.78rem", color: "#4a6d8a" }}>Points:</label>
                 <input type="number" min="1" max="10" value={ques.points} onChange={e => updateQ(qi, "points", +e.target.value)} style={{ width: 52, padding: "4px 8px", border: "1.5px solid #d6e4f0", borderRadius: 6, fontSize: "0.85rem" }} />
-                <button className="btn btn-danger btn-sm" onClick={() => removeQ(qi)}>✕</button>
+                <button className="btn btn-danger btn-sm" onClick={() => removeQ(qi)}></button>
               </div>
             </div>
             <textarea className="form-input" style={{ width: "100%", resize: "vertical", minHeight: 60 }} placeholder="Enter question text... (use $...$ for inline LaTeX, $$...$$ for block)" value={ques.text} onChange={e => updateQ(qi, "text", e.target.value)} />
@@ -947,7 +946,7 @@ const QuizBuilder = ({ quiz, onSave, onCancel, teacher, classes }) => {
                       <LatexText text={opt} />
                     </div>
                   )}
-                  {ques.correct === oi && !latexMode && <span style={{ fontSize: "0.75rem", color: "#1a7a42", fontWeight: 600 }}>✓ Correct</span>}
+                  {ques.correct === oi && !latexMode && <span style={{ fontSize: "0.75rem", color: "#1a7a42", fontWeight: 600 }}> Correct</span>}
                 </div>
               ))}
             </div>
@@ -959,16 +958,16 @@ const QuizBuilder = ({ quiz, onSave, onCancel, teacher, classes }) => {
       <div style={{ display: "flex", gap: 12, justifyContent: "flex-end", paddingTop: 8 }}>
         <button className="btn btn-secondary" onClick={onCancel}>Cancel</button>
         <button className="btn btn-secondary" onClick={() => onSave({...q, status:"draft"})}>Save as Draft</button>
-        <button className="btn btn-primary" onClick={() => onSave({...q, status:"published"})}>🚀 Publish Quiz</button>
+        <button className="btn btn-primary" onClick={() => onSave({...q, status:"published"})}> Publish Quiz</button>
       </div>
 
-      {/* ── BULK IMPORT MODAL ── */}
+      {/*  BULK IMPORT MODAL  */}
       {importModal && (
         <div className="modal-overlay" onClick={() => { setImportModal(false); setImportPreview([]); setImportError(""); }}>
           <div className="modal-box" onClick={e => e.stopPropagation()} style={{ maxWidth: 680, maxHeight: "90vh", overflow: "auto" }}>
-            <h3 style={{ marginBottom: 6 }}>📋 Bulk Import Questions</h3>
+            <h3 style={{ marginBottom: 6 }}> Bulk Import Questions</h3>
             <p style={{ color: "#4a6d8a", fontSize: "0.85rem", marginBottom: 16 }}>
-              Paste your questions below. Use the format shown. Separate questions with a line of dashes (---) or the ⸻ character. LaTeX is supported using <code style={{ background: "#f0f7ff", padding: "1px 5px", borderRadius: 4 }}>$...$</code> for inline and <code style={{ background: "#f0f7ff", padding: "1px 5px", borderRadius: 4 }}>$$...$$</code> for block math.
+              Paste your questions below. Use the format shown. Separate questions with a line of dashes (---) or the  character. LaTeX is supported using <code style={{ background: "#f0f7ff", padding: "1px 5px", borderRadius: 4 }}>$...$</code> for inline and <code style={{ background: "#f0f7ff", padding: "1px 5px", borderRadius: 4 }}>$$...$$</code> for block math.
             </p>
 
             {/* Format example */}
@@ -1001,14 +1000,14 @@ const QuizBuilder = ({ quiz, onSave, onCancel, teacher, classes }) => {
             )}
 
             <button className="btn btn-primary" style={{ marginTop: 12, width: "100%", justifyContent: "center" }} onClick={handleParseImport}>
-              🔍 Parse Questions
+               Parse Questions
             </button>
 
             {/* Preview */}
             {importPreview.length > 0 && (
               <div style={{ marginTop: 20 }}>
                 <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 12 }}>
-                  <h4 style={{ color: "#0d3a5f", fontSize: "0.95rem" }}>✅ {importPreview.length} question{importPreview.length>1?"s":""} found — preview:</h4>
+                  <h4 style={{ color: "#0d3a5f", fontSize: "0.95rem" }}> {importPreview.length} question{importPreview.length>1?"s":""} found — preview:</h4>
                 </div>
                 {importPreview.map((p, i) => (
                   <div key={i} style={{ padding: "12px 16px", background: "#f7fafd", border: "1.5px solid #d6e4f0", borderRadius: 10, marginBottom: 10 }}>
@@ -1021,14 +1020,14 @@ const QuizBuilder = ({ quiz, onSave, onCancel, teacher, classes }) => {
                           {["A","B","C","D"][oi]}
                         </span>
                         <LatexText text={opt} />
-                        {oi===p.correct && <span style={{ fontSize: "0.75rem", color: "#1a7a42", fontWeight: 600 }}>✓ Correct</span>}
+                        {oi===p.correct && <span style={{ fontSize: "0.75rem", color: "#1a7a42", fontWeight: 600 }}> Correct</span>}
                       </div>
                     ))}
                   </div>
                 ))}
                 <div style={{ display: "flex", gap: 10, marginTop: 4 }}>
                   <button className="btn btn-secondary" style={{ flex: 1, justifyContent: "center" }} onClick={() => { setImportPreview([]); }}>← Edit</button>
-                  <button className="btn btn-success" style={{ flex: 1, justifyContent: "center" }} onClick={handleConfirmImport}>✓ Add {importPreview.length} Questions</button>
+                  <button className="btn btn-success" style={{ flex: 1, justifyContent: "center" }} onClick={handleConfirmImport}> Add {importPreview.length} Questions</button>
                 </div>
               </div>
             )}
@@ -1039,7 +1038,7 @@ const QuizBuilder = ({ quiz, onSave, onCancel, teacher, classes }) => {
   );
 };
 
-// ─── PROJECTION MODE ──────────────────────────────────────────────────────────
+//  PROJECTION MODE 
 const ProjectionMode = ({ quiz, onExit }) => {
   const [step, setStep] = useState(-1); // -1 = lobby, -2 = results
   const [timeLeft, setTimeLeft] = useState(0);
@@ -1078,7 +1077,7 @@ const ProjectionMode = ({ quiz, onExit }) => {
         </div>
         <div style={{ display: "flex", alignItems: "center", gap: 20 }}>
           {step >= 0 && <span style={{ color: "rgba(255,255,255,0.7)", fontSize: "0.9rem" }}>Question {step+1} / {quiz.questions.length}</span>}
-          <button className="btn btn-secondary btn-sm" onClick={onExit}>✕ Exit</button>
+          <button className="btn btn-secondary btn-sm" onClick={onExit}> Exit</button>
         </div>
       </div>
 
@@ -1087,13 +1086,13 @@ const ProjectionMode = ({ quiz, onExit }) => {
           <div style={{ fontSize: "clamp(2rem,5vw,4rem)", fontFamily: "Playfair Display, serif", marginBottom: 16 }}>{quiz.title}</div>
           <div style={{ color: "rgba(255,255,255,0.7)", fontSize: "1.2rem", marginBottom: 12 }}>{quiz.questions.length} Questions · {quiz.testTimer} min · {quiz.questionTimer}s per question</div>
           <div style={{ color: "rgba(255,255,255,0.5)", marginBottom: 40, fontSize: "1rem" }}>{quiz.subject} — {quiz.class}</div>
-          <button className="btn btn-gold btn-lg" onClick={() => setStep(0)}>▶ Start Projection</button>
+          <button className="btn btn-gold btn-lg" onClick={() => setStep(0)}> Start Projection</button>
         </div>
       )}
 
       {step === -2 && (
         <div className="projection-body" style={{ textAlign: "center" }}>
-          <div style={{ fontSize: "3rem", marginBottom: 12 }}>🏆</div>
+          <div style={{ fontSize: "3rem", marginBottom: 12 }}></div>
           <div style={{ fontSize: "clamp(2rem,4vw,3.5rem)", fontFamily: "Playfair Display, serif", marginBottom: 12 }}>Quiz Complete!</div>
           <div style={{ color: "rgba(255,255,255,0.7)", fontSize: "1.1rem" }}>{quiz.questions.length} questions reviewed</div>
           <button className="btn btn-gold btn-lg" style={{ marginTop: 32 }} onClick={onExit}>← Back to Dashboard</button>
@@ -1125,13 +1124,13 @@ const ProjectionMode = ({ quiz, onExit }) => {
                     {["A","B","C","D"][i]}
                   </div>
                   <span><LatexText text={renderPlainMath(opt)} /></span>
-                  {revealed && i===q.correct && <span style={{ marginLeft: "auto", fontSize: "1.2rem" }}>✓</span>}
+                  {revealed && i===q.correct && <span style={{ marginLeft: "auto", fontSize: "1.2rem" }}></span>}
                 </div>
               ))}
             </div>
 
             <div style={{ display: "flex", gap: 12, marginTop: 32 }}>
-              {!revealed && <button className="btn btn-gold" onClick={() => { clearInterval(timerRef.current); setRevealed(true); setTimeLeft(0); }}>👁 Reveal Answer</button>}
+              {!revealed && <button className="btn btn-gold" onClick={() => { clearInterval(timerRef.current); setRevealed(true); setTimeLeft(0); }}> Reveal Answer</button>}
               <button className="btn btn-primary" onClick={next}>{step < quiz.questions.length-1 ? "Next Question →" : "Finish Quiz"}</button>
             </div>
           </div>
@@ -1141,7 +1140,7 @@ const ProjectionMode = ({ quiz, onExit }) => {
   );
 };
 
-// ─── TEACHER DASHBOARD ────────────────────────────────────────────────────────
+//  TEACHER DASHBOARD 
 const TeacherDashboard = ({ user, quizzes, setQuizzes, attempts, classes }) => {
   const [view, setView] = useState("list");
   const [editing, setEditing] = useState(null);
@@ -1181,7 +1180,7 @@ const TeacherDashboard = ({ user, quizzes, setQuizzes, attempts, classes }) => {
       </div>
 
       {myQuizzes.length === 0 ? (
-        <div className="card"><div className="empty-state"><div className="empty-state-icon">📝</div><p>No quizzes yet. Create your first one!</p></div></div>
+        <div className="card"><div className="empty-state"><div className="empty-state-icon"></div><p>No quizzes yet. Create your first one!</p></div></div>
       ) : (
         <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
           {myQuizzes.map(quiz => {
@@ -1195,21 +1194,21 @@ const TeacherDashboard = ({ user, quizzes, setQuizzes, attempts, classes }) => {
                       <span className={`badge ${quiz.status==="published"?"badge-green":"badge-gray"}`}>{quiz.status}</span>
                     </div>
                     <div style={{ display: "flex", gap: 14, fontSize: "0.8rem", color: "#4a6d8a" }}>
-                      <span>📚 {quiz.subject}</span>
-                      <span>👥 {quiz.class}</span>
-                      <span>❓ {quiz.questions.length} questions</span>
+                      <span> {quiz.subject}</span>
+                      <span> {quiz.class}</span>
+                      <span> {quiz.questions.length} questions</span>
                       <span>⏱ {quiz.testTimer}min total</span>
-                      <span>🕐 {quiz.questionTimer}s/question</span>
-                      <span>📊 {qAttempts.length} attempts</span>
+                      <span> {quiz.questionTimer}s/question</span>
+                      <span> {qAttempts.length} attempts</span>
                     </div>
                   </div>
                   <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
-                    <button className="btn btn-secondary btn-sm" onClick={() => { setEditing(quiz); setView("builder"); }}>✏️ Edit</button>
-                    <button className="btn btn-gold btn-sm" onClick={() => setProjecting(quiz)}>📽 Project</button>
+                    <button className="btn btn-secondary btn-sm" onClick={() => { setEditing(quiz); setView("builder"); }}> Edit</button>
+                    <button className="btn btn-gold btn-sm" onClick={() => setProjecting(quiz)}> Project</button>
                     <button className={`btn btn-sm ${quiz.status==="published"?"btn-secondary":"btn-success"}`} onClick={() => togglePublish(quiz.id)}>
-                      {quiz.status==="published" ? "📤 Unpublish" : "🚀 Publish"}
+                      {quiz.status==="published" ? " Unpublish" : " Publish"}
                     </button>
-                    <button className="btn btn-danger btn-sm" onClick={() => deleteQuiz(quiz.id)}>🗑</button>
+                    <button className="btn btn-danger btn-sm" onClick={() => deleteQuiz(quiz.id)}></button>
                   </div>
                 </div>
               </div>
@@ -1221,7 +1220,7 @@ const TeacherDashboard = ({ user, quizzes, setQuizzes, attempts, classes }) => {
   );
 };
 
-// ─── STUDENT QUIZ ATTEMPT ─────────────────────────────────────────────────────
+//  STUDENT QUIZ ATTEMPT 
 const QuizAttempt = ({ quiz, user, onSubmit, onBack }) => {
   const [step, setStep] = useState(0);
   const [answers, setAnswers] = useState(Array(quiz.questions.length).fill(null));
@@ -1280,7 +1279,7 @@ const QuizAttempt = ({ quiz, user, onSubmit, onBack }) => {
   const pct = Math.round((score/total)*100);
 
   if (submitted) {
-    const rank = pct >= 80 ? "🏆 Excellent!" : pct >= 60 ? "👍 Good Job!" : "📚 Keep Studying";
+    const rank = pct >= 80 ? " Excellent!" : pct >= 60 ? " Good Job!" : " Keep Studying";
     return (
       <div className="quiz-wrap fade-in" style={{ textAlign: "center", paddingTop: 40 }}>
         <button className="btn btn-secondary btn-sm" onClick={onBack} style={{ marginBottom: 24 }}>← Back</button>
@@ -1303,13 +1302,13 @@ const QuizAttempt = ({ quiz, user, onSubmit, onBack }) => {
           {quiz.questions.map((q, i) => (
             <div key={i} className="card" style={{ padding: 16, marginBottom: 10 }}>
               <div style={{ display: "flex", gap: 10, marginBottom: 10 }}>
-                <span style={{ background: answers[i]===q.correct?"#d4efdf":"#fde8e6", color: answers[i]===q.correct?"#1a7a42":"#a93226", fontWeight: 700, borderRadius: 6, padding: "2px 10px", fontSize: "0.8rem" }}>{answers[i]===q.correct?"✓":"✗"}</span>
+                <span style={{ background: answers[i]===q.correct?"#d4efdf":"#fde8e6", color: answers[i]===q.correct?"#1a7a42":"#a93226", fontWeight: 700, borderRadius: 6, padding: "2px 10px", fontSize: "0.8rem" }}>{answers[i]===q.correct?"":""}</span>
                 <span style={{ fontWeight: 600 }}>Q{i+1}: {q.text}</span>
               </div>
               <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
                 {q.options.map((o,oi) => (
                   <div key={oi} style={{ padding: "6px 12px", borderRadius: 6, fontSize: "0.88rem", background: oi===q.correct?"#d4efdf":oi===answers[i]&&answers[i]!==q.correct?"#fde8e6":"transparent", color: oi===q.correct?"#1a7a42":oi===answers[i]&&answers[i]!==q.correct?"#a93226":"#4a6d8a" }}>
-                    {["A","B","C","D"][oi]}. {o} {oi===q.correct?" ✓":""}
+                    {["A","B","C","D"][oi]}. {o} {oi===q.correct?" ":""}
                   </div>
                 ))}
               </div>
@@ -1365,7 +1364,7 @@ const QuizAttempt = ({ quiz, user, onSubmit, onBack }) => {
   );
 };
 
-// ─── STUDENT DASHBOARD ────────────────────────────────────────────────────────
+//  STUDENT DASHBOARD 
 const StudentDashboard = ({ user, quizzes, attempts, setAttempts }) => {
   const [taking, setTaking] = useState(null);
 
@@ -1389,7 +1388,7 @@ const StudentDashboard = ({ user, quizzes, attempts, setAttempts }) => {
       </div>
 
       {available.length === 0 ? (
-        <div className="card"><div className="empty-state"><div className="empty-state-icon">📭</div><p>No quizzes available for your class yet.</p></div></div>
+        <div className="card"><div className="empty-state"><div className="empty-state-icon"></div><p>No quizzes available for your class yet.</p></div></div>
       ) : (
         <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill,minmax(300px,1fr))", gap: 16 }}>
           {available.map(quiz => {
@@ -1418,7 +1417,7 @@ const StudentDashboard = ({ user, quizzes, attempts, setAttempts }) => {
   );
 };
 
-// ─── TOPBAR ───────────────────────────────────────────────────────────────────
+//  TOPBAR 
 const Topbar = ({ user, onLogout }) => (
   <div className="topbar">
     <div style={{ fontSize: "0.9rem", color: "#4a6d8a" }}>
@@ -1432,11 +1431,11 @@ const Topbar = ({ user, onLogout }) => (
   </div>
 );
 
-// ─── SIDEBAR ──────────────────────────────────────────────────────────────────
+//  SIDEBAR 
 const Sidebar = ({ user, active, setActive }) => {
-  const adminNav = [{ id: "overview", icon: "📊", label: "Dashboard" }, { id: "classes", icon: "🏫", label: "Classes" }, { id: "teachers", icon: "👨‍🏫", label: "Teachers" }, { id: "students", icon: "👩‍🎓", label: "Students" }];
-  const teacherNav = [{ id: "quizzes", icon: "📝", label: "My Quizzes" }];
-  const studentNav = [{ id: "quizzes", icon: "🎯", label: "My Quizzes" }];
+  const adminNav = [{ id: "overview", icon: "", label: "Dashboard" }, { id: "classes", icon: "", label: "Classes" }, { id: "teachers", icon: "", label: "Teachers" }, { id: "students", icon: "", label: "Students" }];
+  const teacherNav = [{ id: "quizzes", icon: "", label: "My Quizzes" }];
+  const studentNav = [{ id: "quizzes", icon: "", label: "My Quizzes" }];
   const nav = user.role==="admin" ? adminNav : user.role==="teacher" ? teacherNav : studentNav;
 
   return (
@@ -1466,7 +1465,7 @@ const Sidebar = ({ user, active, setActive }) => {
   );
 };
 
-// ─── APP ROOT ─────────────────────────────────────────────────────────────────
+//  APP ROOT 
 export default function App() {
   const [users, setUsers] = useLocalStore("mqa_users", SEED.users);
   const [classes, setClasses] = useLocalStore("mqa_classes", SEED.classes);
@@ -1495,7 +1494,7 @@ export default function App() {
           <Topbar user={currentUser} onLogout={handleLogout} />
           <div className="main-content">
             {currentUser.role === "admin" && (
-              <AdminDashboard users={users} setUsers={u => { setUsers(u); }} quizzes={quizzes} classes={classes} setClasses={setClasses} />
+              <AdminDashboard users={users} setUsers={u => { setUsers(u); }} quizzes={quizzes} classes={classes} setClasses={setClasses} activeTab={activeTab} setActiveTab={setActiveTab} />
             )}
             {currentUser.role === "teacher" && (
               <TeacherDashboard user={currentUser} quizzes={quizzes} setQuizzes={setQuizzes} attempts={attempts} classes={classes} />
