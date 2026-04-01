@@ -229,8 +229,8 @@ const SEED = {
       id: 2, title: "Math Quiz: Quadratic Equations", subject: "Mathematics", class: "Class 10B",
       teacherId: 2, status: "draft", testTimer: 15, questionTimer: 45,
       questions: [
-        { id: 1, text: "What is the quadratic formula?", options: ["x = -b ± √(b²-4ac) / 2a", "x = b ± √(b²+4ac) / 2a", "x = -b ± √(b²-4ac) / a", "x = b / 2a"], correct: 0, points: 3 },
-        { id: 2, text: "The discriminant b²-4ac < 0 means:", options: ["Two real roots", "One real root", "No real roots", "Infinite roots"], correct: 2, points: 3 },
+        { id: 1, text: "What is the quadratic formula?", options: ["x = -b +/- sqrt(b^2-4ac) / 2a", "x = b +/- sqrt(b^2+4ac) / 2a", "x = -b +/- sqrt(b^2-4ac) / a", "x = b / 2a"], correct: 0, points: 3 },
+        { id: 2, text: "The discriminant b^2-4ac < 0 means:", options: ["Two real roots", "One real root", "No real roots", "Infinite roots"], correct: 2, points: 3 },
       ]
     },
   ],
@@ -328,9 +328,9 @@ const LoginPage = ({ users, onLogin, onRegister }) => {
             </div>
             <div className="form-group">
               <label className="form-label">Password</label>
-              <input className="form-input" type="password" placeholder="••••••••" value={form.password} onChange={e => setForm(f=>({...f,password:e.target.value}))} onKeyDown={e => e.key==="Enter" && handleLogin()} />
+              <input className="form-input" type="password" placeholder="........" value={form.password} onChange={e => setForm(f=>({...f,password:e.target.value}))} onKeyDown={e => e.key==="Enter" && handleLogin()} />
             </div>
-            <button className="btn btn-primary" style={{ width: "100%", justifyContent: "center", marginTop: 4 }} onClick={handleLogin}>Sign In →</button>
+            <button className="btn btn-primary" style={{ width: "100%", justifyContent: "center", marginTop: 4 }} onClick={handleLogin}>Sign In</button>
             <div style={{ marginTop: 20, padding: "14px", background: "#f7fafd", borderRadius: 10, fontSize: "0.78rem", color: "#4a6d8a" }}>
               <strong>Demo accounts:</strong><br />
               Admin: admin@mantra.edu / admin123<br />
@@ -350,7 +350,7 @@ const LoginPage = ({ users, onLogin, onRegister }) => {
             </div>
             <div className="form-group">
               <label className="form-label">Password</label>
-              <input className="form-input" type="password" placeholder="••••••••" value={form.password} onChange={e => setForm(f=>({...f,password:e.target.value}))} />
+              <input className="form-input" type="password" placeholder="........" value={form.password} onChange={e => setForm(f=>({...f,password:e.target.value}))} />
             </div>
             <div className="two-col">
               <div className="form-group">
@@ -455,7 +455,7 @@ const AdminDashboard = ({ users, setUsers, quizzes, classes, setClasses, activeT
       </div>
 
       <div style={{ display: "flex", gap: 8, marginBottom: 20, flexWrap: "wrap" }}>
-        {[["overview","⏳ Pending"],["classes"," Classes"],["teachers"," Teachers"],["students"," Students"]].map(([t,l]) => (
+        {[["overview","Pending"],["classes"," Classes"],["teachers"," Teachers"],["students"," Students"]].map(([t,l]) => (
           <button key={t} className={`btn ${tab===t?"btn-primary":"btn-secondary"} btn-sm`} onClick={() => setTab(t)}>{l}</button>
         ))}
       </div>
@@ -463,7 +463,7 @@ const AdminDashboard = ({ users, setUsers, quizzes, classes, setClasses, activeT
       {/*  PENDING APPROVALS  */}
       {tab === "overview" && (
         <div className="card" style={{ padding: 24 }}>
-          <h3 style={{ marginBottom: 16, fontSize: "1.1rem", color: "#0d3a5f" }}>⏳ Pending Approvals ({pending.length})</h3>
+          <h3 style={{ marginBottom: 16, fontSize: "1.1rem", color: "#0d3a5f" }}>Pending Approvals ({pending.length})</h3>
           {pending.length === 0 ? <div className="empty-state"><div className="empty-state-icon"></div><p>No pending registrations</p></div> : (
             <table className="data-table">
               <thead><tr><th>Name</th><th>Email</th><th>Role</th><th>Actions</th></tr></thead>
@@ -531,7 +531,7 @@ const AdminDashboard = ({ users, setUsers, quizzes, classes, setClasses, activeT
                 <td>
                   <div style={{ display: "flex", gap: 6, flexWrap: "wrap" }}>
                     {(t.classes||[]).map(c => (
-                      <span key={c} className="badge badge-blue" style={{ cursor: "pointer" }} onClick={() => removeClass(t.id, c)} title="Click to remove">{c} ×</span>
+                      <span key={c} className="badge badge-blue" style={{ cursor: "pointer" }} onClick={() => removeClass(t.id, c)} title="Click to remove">{c} x</span>
                     ))}
                     {!(t.classes||[]).length && <span style={{ color: "#8aabca", fontSize: "0.85rem" }}>No classes</span>}
                   </div>
@@ -555,7 +555,7 @@ const AdminDashboard = ({ users, setUsers, quizzes, classes, setClasses, activeT
                 return (
                   <tr key={s.id}>
                     <td><strong>{s.name}</strong><br /><span style={{ fontSize: "0.78rem", color: "#8aabca" }}>{s.email}</span></td>
-                    <td><span className="badge badge-green">{s.class||"—"}</span></td>
+                    <td><span className="badge badge-green">{s.class||"-"}</span></td>
                     <td>
                       <div style={{ display: "flex", flexWrap: "wrap", gap: 6 }}>
                         {(s.subjects||[]).length === 0 && <span style={{ color: "#8aabca", fontSize: "0.82rem" }}>None assigned</span>}
@@ -616,12 +616,12 @@ const AdminDashboard = ({ users, setUsers, quizzes, classes, setClasses, activeT
             <div className="modal-box" onClick={e => e.stopPropagation()}>
               <h3 style={{ marginBottom: 4 }}>Assign Subjects</h3>
               <p style={{ color: "#4a6d8a", fontSize: "0.88rem", marginBottom: 20 }}>
-                {subjectModal.name} · <span className="badge badge-green">{subjectModal.class}</span>
+                {subjectModal.name} - <span className="badge badge-green">{subjectModal.class}</span>
               </p>
               {cls && cls.subjects.length > 0 ? (
                 <div>
                   <label className="form-label" style={{ marginBottom: 12, display: "block" }}>
-                    Select subjects for this student — tick to enrol
+                    Select subjects for this student - tick to enrol
                   </label>
                   <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
                     {cls.subjects.map(sub => {
@@ -710,34 +710,7 @@ const LatexText = ({ text }) => {
   );
 };
 
-// Simple LaTeX symbol converter
-const renderLatex = (latex) => {
-  return latex
-    .replace(/\frac\{([^}]+)\}\{([^}]+)\}/g, '($1)/($2)')
-    .replace(/\sqrt\{([^}]+)\}/g, '√($1)')
-    .replace(/\sqrt/g, '√')
-    .replace(/\^(\{[^}]+\}|[^\s{])/g, (_, exp) => '^' + exp.replace(/[{}]/g,''))
-    .replace(/_(\{[^}]+\}|[^\s{])/g, (_, sub) => '₍' + sub.replace(/[{}]/g,'') + '₎')
-    .replace(/\times/g, '×').replace(/\div/g, '÷').replace(/\pm/g, '±')
-    .replace(/\leq/g, '≤').replace(/\geq/g, '≥').replace(/\neq/g, '≠')
-    .replace(/\alpha/g, 'α').replace(/\beta/g, 'β').replace(/\gamma/g, 'γ')
-    .replace(/\delta/g, 'δ').replace(/\Delta/g, 'Δ').replace(/\pi/g, 'π')
-    .replace(/\theta/g, 'θ').replace(/\lambda/g, 'λ').replace(/\mu/g, 'μ')
-    .replace(/\sigma/g, 'σ').replace(/\Sigma/g, 'Σ').replace(/\omega/g, 'ω')
-    .replace(/\infty/g, '∞').replace(/\sum/g, 'Σ').replace(/\int/g, '∫')
-    .replace(/\cdot/g, '·').replace(/\ldots/g, '…').replace(/\rightarrow/g, '→')
-    .replace(/\leftarrow/g, '←').replace(/\Rightarrow/g, '⇒')
-    .replace(/[{}\]/g, '');
-};
-
-// Also handle plain text math notation (no $ needed)
-const renderPlainMath = (text) => {
-  if (!text) return text;
-  return text
-    .replace(/\^2/g, '²').replace(/\^3/g, '³')
-    .replace(/sqrt\(([^)]+)\)/g, '√($1)')
-    .replace(/√(\d+)/g, (_, n) => '√' + n);
-};
+// LaTeX rendering handled by KaTeX via LatexText component
 
 //  BULK IMPORT PARSER 
 //  LATEX RENDERER 
@@ -764,7 +737,7 @@ const LatexText = ({ text }) => {
 const parseBulkQuestions = (raw) => {
   const results = [];
   // Split blocks by separator lines: ---, , or 2+ blank lines
-  const blocks = raw.split(/\n[ \t]*(?:[-–—]{2,})[ \t]*\n|\n{2,}/).map(b => b.trim()).filter(Boolean);
+  const blocks = raw.split(/\n[ \t]*(?:[---]{2,})[ \t]*\n|\n{2,}/).map(b => b.trim()).filter(Boolean);
 
   for (const block of blocks) {
     const lines = block.split('\n').map(l => l.trim()).filter(Boolean);
@@ -849,7 +822,7 @@ const QuizBuilder = ({ quiz, onSave, onCancel, teacher, classes }) => {
       <script src="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.9/katex.min.js" async />
 
       <div style={{ display: "flex", alignItems: "center", gap: 14, marginBottom: 24 }}>
-        <button className="btn btn-secondary btn-sm" onClick={onCancel}>← Back</button>
+        <button className="btn btn-secondary btn-sm" onClick={onCancel}>Back</button>
         <div>
           <h2 className="page-title" style={{ fontSize: "1.5rem" }}>{quiz ? "Edit Quiz" : "Create Quiz"}</h2>
         </div>
@@ -866,7 +839,7 @@ const QuizBuilder = ({ quiz, onSave, onCancel, teacher, classes }) => {
             <label className="form-label">Class</label>
             {teacherClasses.length > 0 ? (
               <select className="form-input" value={q.class} onChange={e => setQ(p=>({...p,class:e.target.value,subject:""}))}>
-                <option value="">— Select a class —</option>
+                <option value="">- Select a class -</option>
                 {teacherClasses.map(c => <option key={c.name} value={c.name}>{c.name}</option>)}
               </select>
             ) : (
@@ -880,7 +853,7 @@ const QuizBuilder = ({ quiz, onSave, onCancel, teacher, classes }) => {
               const subs = cls ? cls.subjects : [];
               return subs.length > 0 ? (
                 <select className="form-input" value={q.subject} onChange={e => setQ(p=>({...p,subject:e.target.value}))}>
-                  <option value="">— Select a subject —</option>
+                  <option value="">- Select a subject -</option>
                   {subs.map(s => <option key={s} value={s}>{s}</option>)}
                 </select>
               ) : (
@@ -891,7 +864,7 @@ const QuizBuilder = ({ quiz, onSave, onCancel, teacher, classes }) => {
         </div>
         <div className="two-col" style={{ marginTop: 4 }}>
           <div className="form-group">
-            <label className="form-label">⏱ Test Timer (minutes)</label>
+            <label className="form-label">Test Timer (minutes)</label>
             <input className="form-input" type="number" min="1" max="180" value={q.testTimer} onChange={e => setQ(p=>({...p,testTimer:+e.target.value}))} />
             <span style={{ fontSize: "0.78rem", color: "#4a6d8a" }}>Total time allowed for the entire quiz</span>
           </div>
@@ -909,7 +882,7 @@ const QuizBuilder = ({ quiz, onSave, onCancel, teacher, classes }) => {
         <div style={{ display: "flex", gap: 8, alignItems: "center" }}>
           <label style={{ display: "flex", alignItems: "center", gap: 6, fontSize: "0.85rem", color: "#4a6d8a", cursor: "pointer", padding: "6px 12px", borderRadius: 8, background: latexMode ? "#e8f4fd" : "#f7fafd", border: `1.5px solid ${latexMode?"#2a7fc1":"#d6e4f0"}` }}>
             <input type="checkbox" checked={latexMode} onChange={e => setLatexMode(e.target.checked)} style={{ accentColor: "#2a7fc1" }} />
-            <span style={{ fontWeight: 600, color: latexMode ? "#0d3a5f" : "#4a6d8a" }}>∑ LaTeX Preview</span>
+            <span style={{ fontWeight: 600, color: latexMode ? "#0d3a5f" : "#4a6d8a" }}>LaTeX Preview</span>
           </label>
           <button className="btn btn-gold btn-sm" onClick={() => setImportModal(true)}> Bulk Import</button>
         </div>
@@ -1007,7 +980,7 @@ const QuizBuilder = ({ quiz, onSave, onCancel, teacher, classes }) => {
             {importPreview.length > 0 && (
               <div style={{ marginTop: 20 }}>
                 <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 12 }}>
-                  <h4 style={{ color: "#0d3a5f", fontSize: "0.95rem" }}> {importPreview.length} question{importPreview.length>1?"s":""} found — preview:</h4>
+                <h4 style={{ color: "#0d3a5f", fontSize: "0.95rem" }}>{importPreview.length} question{importPreview.length>1?"s":""} found - preview:</h4>
                 </div>
                 {importPreview.map((p, i) => (
                   <div key={i} style={{ padding: "12px 16px", background: "#f7fafd", border: "1.5px solid #d6e4f0", borderRadius: 10, marginBottom: 10 }}>
@@ -1026,7 +999,7 @@ const QuizBuilder = ({ quiz, onSave, onCancel, teacher, classes }) => {
                   </div>
                 ))}
                 <div style={{ display: "flex", gap: 10, marginTop: 4 }}>
-                  <button className="btn btn-secondary" style={{ flex: 1, justifyContent: "center" }} onClick={() => { setImportPreview([]); }}>← Edit</button>
+                  <button className="btn btn-secondary" style={{ flex: 1, justifyContent: "center" }} onClick={() => { setImportPreview([]); }}> Edit</button>
                   <button className="btn btn-success" style={{ flex: 1, justifyContent: "center" }} onClick={handleConfirmImport}> Add {importPreview.length} Questions</button>
                 </div>
               </div>
@@ -1040,20 +1013,47 @@ const QuizBuilder = ({ quiz, onSave, onCancel, teacher, classes }) => {
 
 //  PROJECTION MODE 
 const ProjectionMode = ({ quiz, onExit }) => {
-  const [step, setStep] = useState(-1); // -1 = lobby, -2 = results
+  const [step, setStep] = useState(-1); // -1 = lobby, -2 = finished all loops
   const [timeLeft, setTimeLeft] = useState(0);
+  const [testTimeLeft, setTestTimeLeft] = useState(quiz.testTimer * 60);
   const [revealed, setRevealed] = useState(false);
+  const [loopCount, setLoopCount] = useState(0);
   const timerRef = useRef(null);
+  const testTimerRef = useRef(null);
 
-  const q = step >= 0 ? quiz.questions[step] : null;
+  // Test-level countdown
+  useEffect(() => {
+    if (step === -1) return;
+    testTimerRef.current = setInterval(() => {
+      setTestTimeLeft(t => {
+        if (t <= 1) { clearInterval(testTimerRef.current); return 0; }
+        return t - 1;
+      });
+    }, 1000);
+    return () => clearInterval(testTimerRef.current);
+  }, [step === -1]);
 
+  // Question-level countdown - auto advance when timer hits 0, loop back to Q1 if needed
   useEffect(() => {
     if (step < 0) return;
     setTimeLeft(quiz.questionTimer);
     setRevealed(false);
+    clearInterval(timerRef.current);
     timerRef.current = setInterval(() => {
       setTimeLeft(t => {
-        if (t <= 1) { clearInterval(timerRef.current); setRevealed(true); return 0; }
+        if (t <= 1) {
+          clearInterval(timerRef.current);
+          setRevealed(true);
+          setTimeout(() => {
+            setStep(s => {
+              if (s < quiz.questions.length - 1) return s + 1;
+              // All questions done - if test time remains, loop back
+              setLoopCount(l => l + 1);
+              return 0;
+            });
+          }, 1500);
+          return 0;
+        }
         return t - 1;
       });
     }, 1000);
@@ -1062,52 +1062,70 @@ const ProjectionMode = ({ quiz, onExit }) => {
 
   const next = () => {
     clearInterval(timerRef.current);
-    if (step < quiz.questions.length - 1) { setStep(s => s + 1); }
-    else setStep(-2);
+    setStep(s => {
+      if (s < quiz.questions.length - 1) return s + 1;
+      setLoopCount(l => l + 1);
+      return 0;
+    });
   };
 
+  const finish = () => {
+    clearInterval(timerRef.current);
+    clearInterval(testTimerRef.current);
+    setStep(-2);
+  };
+
+  const q = step >= 0 ? quiz.questions[step] : null;
   const urgentColor = timeLeft <= 5 && timeLeft > 0 ? "#e74c3c" : "rgba(255,255,255,0.9)";
+  const testMins = Math.floor(testTimeLeft / 60);
+  const testSecs = testTimeLeft % 60;
 
   return (
     <div className="projection-wrap">
       <div className="projection-header">
         <div>
           <div style={{ fontSize: "1.4rem", fontFamily: "Playfair Display, serif", fontWeight: 700 }}>{quiz.title}</div>
-          <div style={{ color: "rgba(255,255,255,0.6)", fontSize: "0.85rem" }}>{quiz.subject} · {quiz.class}</div>
+          <div style={{ color: "rgba(255,255,255,0.6)", fontSize: "0.85rem" }}>{quiz.subject} - {quiz.class}</div>
         </div>
         <div style={{ display: "flex", alignItems: "center", gap: 20 }}>
-          {step >= 0 && <span style={{ color: "rgba(255,255,255,0.7)", fontSize: "0.9rem" }}>Question {step+1} / {quiz.questions.length}</span>}
-          <button className="btn btn-secondary btn-sm" onClick={onExit}> Exit</button>
+          {step >= 0 && (
+            <>
+              <span style={{ color: "rgba(255,255,255,0.7)", fontSize: "0.9rem" }}>Q {step+1} / {quiz.questions.length}</span>
+              {loopCount > 0 && <span style={{ background: "rgba(255,255,255,0.12)", borderRadius: 20, padding: "3px 12px", fontSize: "0.78rem", color: "rgba(255,255,255,0.8)" }}>Loop {loopCount + 1}</span>}
+              <span style={{ fontFamily: "Playfair Display, serif", fontSize: "1.1rem", fontWeight: 700, color: testTimeLeft < 60 ? "#e74c3c" : "rgba(255,255,255,0.9)" }}>
+                {testMins}:{String(testSecs).padStart(2, "0")}
+              </span>
+            </>
+          )}
+          <button className="btn btn-secondary btn-sm" onClick={onExit}>Exit</button>
         </div>
       </div>
 
       {step === -1 && (
         <div className="projection-body" style={{ textAlign: "center" }}>
           <div style={{ fontSize: "clamp(2rem,5vw,4rem)", fontFamily: "Playfair Display, serif", marginBottom: 16 }}>{quiz.title}</div>
-          <div style={{ color: "rgba(255,255,255,0.7)", fontSize: "1.2rem", marginBottom: 12 }}>{quiz.questions.length} Questions · {quiz.testTimer} min · {quiz.questionTimer}s per question</div>
-          <div style={{ color: "rgba(255,255,255,0.5)", marginBottom: 40, fontSize: "1rem" }}>{quiz.subject} — {quiz.class}</div>
-          <button className="btn btn-gold btn-lg" onClick={() => setStep(0)}> Start Projection</button>
+          <div style={{ color: "rgba(255,255,255,0.7)", fontSize: "1.2rem", marginBottom: 12 }}>{quiz.questions.length} Questions - {quiz.testTimer} min - {quiz.questionTimer}s per question</div>
+          <div style={{ color: "rgba(255,255,255,0.5)", marginBottom: 40, fontSize: "1rem" }}>{quiz.subject} - {quiz.class}</div>
+          <button className="btn btn-gold btn-lg" onClick={() => setStep(0)}>Start Projection</button>
         </div>
       )}
 
       {step === -2 && (
         <div className="projection-body" style={{ textAlign: "center" }}>
-          <div style={{ fontSize: "3rem", marginBottom: 12 }}></div>
           <div style={{ fontSize: "clamp(2rem,4vw,3.5rem)", fontFamily: "Playfair Display, serif", marginBottom: 12 }}>Quiz Complete!</div>
-          <div style={{ color: "rgba(255,255,255,0.7)", fontSize: "1.1rem" }}>{quiz.questions.length} questions reviewed</div>
-          <button className="btn btn-gold btn-lg" style={{ marginTop: 32 }} onClick={onExit}>← Back to Dashboard</button>
+          <div style={{ color: "rgba(255,255,255,0.7)", fontSize: "1.1rem", marginBottom: 8 }}>{quiz.questions.length} questions reviewed</div>
+          {loopCount > 0 && <div style={{ color: "rgba(255,255,255,0.5)", fontSize: "0.9rem" }}>Looped {loopCount} time{loopCount > 1 ? "s" : ""}</div>}
+          <button className="btn btn-gold btn-lg" style={{ marginTop: 32 }} onClick={onExit}>Back to Dashboard</button>
         </div>
       )}
 
       {step >= 0 && q && (
         <>
-          {/* Timer bar */}
           <div style={{ position: "absolute", top: 80, left: 0, right: 0, height: 6, background: "rgba(255,255,255,0.1)" }}>
             <div style={{ height: "100%", background: timeLeft <= 5 ? "#e74c3c" : "#2a7fc1", transition: "width 0.9s linear, background 0.3s", width: `${(timeLeft/quiz.questionTimer)*100}%` }} />
           </div>
 
           <div className="projection-body">
-            {/* Big timer */}
             <div style={{ position: "absolute", top: "50%", right: 48, transform: "translateY(-100%)" }}>
               <div style={{ textAlign: "center" }}>
                 <div style={{ fontSize: "clamp(3rem,8vw,7rem)", fontFamily: "Playfair Display, serif", fontWeight: 800, color: urgentColor, lineHeight: 1, animation: timeLeft <= 5 && timeLeft > 0 ? "pulse 0.5s infinite" : "none" }}>{timeLeft}</div>
@@ -1115,7 +1133,7 @@ const ProjectionMode = ({ quiz, onExit }) => {
               </div>
             </div>
 
-            <div className="projection-question"><LatexText text={renderPlainMath(q.text)} /></div>
+            <div className="projection-question">{q.text}</div>
 
             <div className="projection-options">
               {q.options.map((opt, i) => (
@@ -1123,15 +1141,18 @@ const ProjectionMode = ({ quiz, onExit }) => {
                   <div style={{ width: 36, height: 36, borderRadius: "50%", background: revealed && i===q.correct ? "rgba(39,174,96,0.4)" : "rgba(255,255,255,0.1)", display: "flex", alignItems: "center", justifyContent: "center", fontWeight: 700, flexShrink: 0 }}>
                     {["A","B","C","D"][i]}
                   </div>
-                  <span><LatexText text={renderPlainMath(opt)} /></span>
-                  {revealed && i===q.correct && <span style={{ marginLeft: "auto", fontSize: "1.2rem" }}></span>}
+                  <span>{opt}</span>
+                  {revealed && i===q.correct && <span style={{ marginLeft: "auto" }}>correct</span>}
                 </div>
               ))}
             </div>
 
             <div style={{ display: "flex", gap: 12, marginTop: 32 }}>
-              {!revealed && <button className="btn btn-gold" onClick={() => { clearInterval(timerRef.current); setRevealed(true); setTimeLeft(0); }}> Reveal Answer</button>}
-              <button className="btn btn-primary" onClick={next}>{step < quiz.questions.length-1 ? "Next Question →" : "Finish Quiz"}</button>
+              {!revealed && <button className="btn btn-gold" onClick={() => { clearInterval(timerRef.current); setRevealed(true); setTimeLeft(0); }}>Reveal Answer</button>}
+              <button className="btn btn-primary" onClick={next}>
+                {step < quiz.questions.length - 1 ? "Next Question" : "Back to Q1"}
+              </button>
+              <button className="btn btn-secondary" onClick={finish}>Finish</button>
             </div>
           </div>
         </>
@@ -1140,7 +1161,6 @@ const ProjectionMode = ({ quiz, onExit }) => {
   );
 };
 
-//  TEACHER DASHBOARD 
 const TeacherDashboard = ({ user, quizzes, setQuizzes, attempts, classes }) => {
   const [view, setView] = useState("list");
   const [editing, setEditing] = useState(null);
@@ -1197,7 +1217,7 @@ const TeacherDashboard = ({ user, quizzes, setQuizzes, attempts, classes }) => {
                       <span> {quiz.subject}</span>
                       <span> {quiz.class}</span>
                       <span> {quiz.questions.length} questions</span>
-                      <span>⏱ {quiz.testTimer}min total</span>
+                      <span>{quiz.testTimer}min total</span>
                       <span> {quiz.questionTimer}s/question</span>
                       <span> {qAttempts.length} attempts</span>
                     </div>
@@ -1248,11 +1268,21 @@ const QuizAttempt = ({ quiz, user, onSubmit, onBack }) => {
     return () => clearInterval(qRef.current);
   }, [step]);
 
-  const advanceAuto = () => {
+  const advanceAuto = (currentAnswers) => {
     setRevealed(true);
     setTimeout(() => {
-      if (step < quiz.questions.length - 1) setStep(s => s + 1);
-      else handleSubmit();
+      const ans = currentAnswers || answers;
+      if (step < quiz.questions.length - 1) {
+        setStep(s => s + 1);
+      } else {
+        // Find first unanswered question to loop back to
+        const firstUnanswered = ans.findIndex(a => a === null);
+        if (firstUnanswered !== -1) {
+          setStep(firstUnanswered);
+        } else {
+          handleSubmit();
+        }
+      }
     }, 1800);
   };
 
@@ -1263,8 +1293,16 @@ const QuizAttempt = ({ quiz, user, onSubmit, onBack }) => {
     const newAns = [...answers]; newAns[step] = i; setAnswers(newAns);
     setRevealed(true);
     setTimeout(() => {
-      if (step < quiz.questions.length - 1) setStep(s => s + 1);
-      else handleSubmit();
+      if (step < quiz.questions.length - 1) {
+        setStep(s => s + 1);
+      } else {
+        const firstUnanswered = newAns.findIndex(a => a === null);
+        if (firstUnanswered !== -1) {
+          setStep(firstUnanswered);
+        } else {
+          handleSubmit();
+        }
+      }
     }, 1500);
   };
 
@@ -1282,7 +1320,7 @@ const QuizAttempt = ({ quiz, user, onSubmit, onBack }) => {
     const rank = pct >= 80 ? " Excellent!" : pct >= 60 ? " Good Job!" : " Keep Studying";
     return (
       <div className="quiz-wrap fade-in" style={{ textAlign: "center", paddingTop: 40 }}>
-        <button className="btn btn-secondary btn-sm" onClick={onBack} style={{ marginBottom: 24 }}>← Back</button>
+        <button className="btn btn-secondary btn-sm" onClick={onBack} style={{ marginBottom: 24 }}>Back</button>
         <div className="card" style={{ padding: 40 }}>
           <div className="result-ring"><div className="result-score">{pct}%</div><div style={{ color: "#4a6d8a", fontSize: "0.8rem" }}>Score</div></div>
           <h2 style={{ fontSize: "1.8rem", marginBottom: 8 }}>{rank}</h2>
@@ -1324,7 +1362,7 @@ const QuizAttempt = ({ quiz, user, onSubmit, onBack }) => {
 
   return (
     <div className="quiz-wrap fade-in">
-      <button className="btn btn-secondary btn-sm" onClick={onBack} style={{ marginBottom: 16 }}>← Exit Quiz</button>
+      <button className="btn btn-secondary btn-sm" onClick={onBack} style={{ marginBottom: 16 }}>Exit Quiz</button>
 
       {/* Progress + timers */}
       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 10 }}>
@@ -1357,7 +1395,7 @@ const QuizAttempt = ({ quiz, user, onSubmit, onBack }) => {
 
       {!revealed && (
         <button className="btn btn-secondary" style={{ width: "100%", justifyContent: "center" }} onClick={() => { clearInterval(qRef.current); advanceAuto(); }}>
-          Skip →
+          Skip
         </button>
       )}
     </div>
@@ -1378,11 +1416,11 @@ const StudentDashboard = ({ user, quizzes, attempts, setAttempts }) => {
     <div className="fade-in">
       <div className="page-header">
         <h2 className="page-title">My Quizzes</h2>
-        <p className="page-subtitle">Class: {user.class || "Not assigned"} · Subjects: {(user.subjects||[]).join(", ")||"None assigned"} · {available.length} quizzes available</p>
+        <p className="page-subtitle">Class: {user.class || "Not assigned"} - Subjects: {(user.subjects||[]).join(", ")||"None assigned"} - {available.length} quizzes available</p>
       </div>
 
       <div className="stats-grid">
-        {[{ v: available.length, l: "Available" }, { v: myAttempts.length, l: "Completed" }, { v: myAttempts.length ? Math.round(myAttempts.reduce((s,a)=>s+(a.score/a.total)*100,0)/myAttempts.length)+"%" : "—", l: "Avg Score" }].map(s => (
+        {[{ v: available.length, l: "Available" }, { v: myAttempts.length, l: "Completed" }, { v: myAttempts.length ? Math.round(myAttempts.reduce((s,a)=>s+(a.score/a.total)*100,0)/myAttempts.length)+"%" : "-", l: "Avg Score" }].map(s => (
           <div className="stat-card" key={s.l}><div className="stat-value">{s.v}</div><div className="stat-label">{s.l}</div></div>
         ))}
       </div>
@@ -1400,13 +1438,13 @@ const StudentDashboard = ({ user, quizzes, attempts, setAttempts }) => {
                   <span style={{ fontSize: "0.8rem", color: "#4a6d8a" }}>{quiz.questions.length} Qs</span>
                 </div>
                 <h3 style={{ fontSize: "1rem", marginBottom: 6, color: "#0d3a5f" }}>{quiz.title}</h3>
-                <p style={{ fontSize: "0.82rem", color: "#4a6d8a", marginBottom: 14 }}>{quiz.subject} · {quiz.testTimer} min · {quiz.questionTimer}s per Q</p>
+                <p style={{ fontSize: "0.82rem", color: "#4a6d8a", marginBottom: 14 }}>{quiz.subject} - {quiz.testTimer} min - {quiz.questionTimer}s per Q</p>
                 {att ? (
                   <div style={{ background: "#f7fafd", borderRadius: 8, padding: "10px 12px", fontSize: "0.85rem", color: "#4a6d8a" }}>
                     Score: <strong style={{ color: "#2a7fc1" }}>{att.score}/{att.total}</strong> ({Math.round((att.score/att.total)*100)}%)
                   </div>
                 ) : (
-                  <button className="btn btn-primary" style={{ width: "100%", justifyContent: "center" }} onClick={() => setTaking(quiz)}>Start Quiz →</button>
+                  <button className="btn btn-primary" style={{ width: "100%", justifyContent: "center" }} onClick={() => setTaking(quiz)}>Start Quiz</button>
                 )}
               </div>
             );
